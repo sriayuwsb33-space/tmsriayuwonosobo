@@ -12,13 +12,13 @@ import { getFirestore, doc, setDoc, onSnapshot } from "firebase/firestore";
 import { getAuth, signInAnonymously, onAuthStateChanged } from "firebase/auth";
 
 const firebaseConfig = {
-apiKey: "AIzaSyCMhxO5hlxUBpZDuPa4PQkJ4EkIFfzxqf8",
-authDomain: "toko-mas-sri-ayu.firebaseapp.com",
-projectId: "toko-mas-sri-ayu",
-storageBucket: "toko-mas-sri-ayu.firebasestorage.app",
-messagingSenderId: "195511507670",
-appId: "1:195511507670:web:7c373950b65995d8f00777",
-measurementId: "G-1BJ26ZSB0F"
+  apiKey: "AIzaSyCMhxO5hlxUBpZDuPa4PQkJ4EkIFfzxqf8",
+  authDomain: "toko-mas-sri-ayu.firebaseapp.com",
+  projectId: "toko-mas-sri-ayu",
+  storageBucket: "toko-mas-sri-ayu.firebasestorage.app",
+  messagingSenderId: "195511507670",
+  appId: "1:195511507670:web:7c373950b65995d8f00777",
+  measurementId: "G-1BJ26ZSB0F"
 };
 
 // Inisialisasi Firebase
