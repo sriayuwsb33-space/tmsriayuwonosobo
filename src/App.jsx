@@ -6,7 +6,7 @@ import { getFirestore, doc, setDoc, onSnapshot, updateDoc, arrayUnion } from "fi
 import { getAuth, signInAnonymously } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCMhxO5hlxUBpZDuPa4PQkJ4EkIFfzxqf8",
+  apiKey: "AIzaSyCMhxO5hlxUBpZDuPa4PQkJ4EkIFfzxqf8", 
   authDomain: "toko-mas-sri-ayu.firebaseapp.com",
   projectId: "toko-mas-sri-ayu",
 };
