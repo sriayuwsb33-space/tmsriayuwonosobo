@@ -114,10 +114,35 @@ export default function App() {
 
       {/* LANDING */}
       {view === 'landing' && (
-        <div className="text-center py-40">
-          <h1 className="text-5xl mb-6">Elegance in Gold</h1>
-          <p className="text-gray-500 mb-8">Toko Mas Sri Ayu Wonosobo</p>
-          <button onClick={() => setView('catalog')} className="border px-8 py-3">
+        <div className="relative h-[80vh] w-full overflow-hidden">
+          {/* Background Image */}
+          <img 
+            src="https://images.unsplash.com/photo-1611652022419-a9419f74343d?auto=format&fit=crop&w=1600&q=80"
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+
+          {/* Overlay gelap biar elegan */}
+          <div className="absolute inset-0 bg-black/40" />
+
+          {/* Content */}
+          <div className="relative z-10 flex flex-col justify-center items-center h-full text-white text-center px-4">
+            <h1 className="text-4xl md:text-6xl mb-6 tracking-wide">
+              Elegance in Gold
+            </h1>
+
+            <p className="text-sm md:text-lg mb-8 text-gray-200 max-w-xl">
+              Koleksi perhiasan emas elegan dari Toko Mas Sri Ayu Wonosobo
+            </p>
+
+            <button 
+              onClick={() => setView('catalog')} 
+              className="border border-white px-8 py-3 hover:bg-white hover:text-black transition"
+            >
+              View Collection
+            </button>
+          </div>
+        </div>
+      )} className="border px-8 py-3">
             View Collection
           </button>
         </div>
