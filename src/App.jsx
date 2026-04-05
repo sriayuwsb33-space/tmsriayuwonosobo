@@ -197,7 +197,7 @@ export default function App() {
       {/* CART */}
       {view === 'cart' && (
         <div className="max-w-lg mx-auto p-10">
-          <h2 className="text-2xl mb-6">Your Cart</h2>
+          <h2 className="text-2xl mb-6">Your Cart</h2> 
 
           {cart.map(i => (
             <div key={i.id} className="flex justify-between mb-3">
