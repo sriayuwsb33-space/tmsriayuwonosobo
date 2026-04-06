@@ -8,10 +8,10 @@ import { getAuth, signInAnonymously } from "firebase/auth";
 
 // FIREBASE
 const firebaseConfig = {
-  apiKey: "AIzaSyCMhxO5hlxUBpZDuPa4PQkJ4EkIFfzxqf8",
+  apiKey: "AIzaSyCMhxO5hlxUBpZDuPa4PQkJ4EkIFfzxqf8", 
   authDomain: "toko-mas-sri-ayu.firebaseapp.com",
   projectId: "toko-mas-sri-ayu",
-};
+}; 
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
