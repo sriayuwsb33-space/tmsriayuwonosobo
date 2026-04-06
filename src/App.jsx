@@ -1,96 +1,181 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { initializeApp } from "firebase/app";
+import {
+getFirestore,
+collection,
+addDoc,
+getDocs,
+updateDoc,
+doc
+} from "firebase/firestore";
 
-export default function TokoMasSriAyu() {
-const [goldPrice, setGoldPrice] = useState(2700000);
-
-const calcPrice = (weight, karat) => {
-const rate = karat === "6K" ? 0.25 : 0.33;
-const base = goldPrice * rate * weight;
-const ongkos = 100000;
-const margin = base * 0.15;
-return Math.round(base + ongkos + margin);
+// 🔥 FIREBASE CONFIG
+const firebaseConfig = {
+apiKey: "AIzaSyCMhxO5hlxUBpZDuPa4PQkJ4EkIFfzxqf8",
+authDomain: "toko-mas-sri-ayu.firebaseapp.com",
+projectId: "toko-mas-sri-ayu",
+storageBucket: "toko-mas-sri-ayu.firebasestorage.app",
+messagingSenderId: "195511507670",
+appId: "1:195511507670:web:7c373950b65995d8f00777",
 };
 
-const products = [
-{ name: "Cincin Elegan Sri Ayu", weight: 3, karat: "6K" },
-{ name: "Gelang Mewah Sri Ayu", weight: 5, karat: "8K" },
-];
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-return ( <div className="min-h-screen bg-white text-black">
-{/* HEADER */} <header className="p-6 shadow-md flex justify-between items-center"> <h1 className="text-xl font-bold">Toko Mas Sri Ayu</h1> <a
-       href="https://wa.me/6282299081829"
-       className="bg-green-500 text-white px-4 py-2 rounded-xl"
-     >
-Chat WhatsApp </a> </header>
+export default function App() {
+const [page, setPage] = useState("shop");
+
+return ( <div className="p-4"> <div className="flex gap-4 mb-6">
+<button onClick={() => setPage("shop")} className="bg-black text-white px-3 py-1">Shop</button>
+<button onClick={() => setPage("admin")} className="bg-gray-700 text-white px-3 py-1">Admin</button> </div>
 
 ```
-  {/* HERO */}
-  <section className="p-10 text-center bg-yellow-100">
-    <h2 className="text-3xl font-bold mb-4">
-      Kilau Emas Terpercaya, Harga Bersahabat
-    </h2>
-    <p className="mb-6">
-      Temukan koleksi emas terbaik dengan harga transparan
-    </p>
-    <button className="bg-black text-white px-6 py-3 rounded-2xl">
-      Belanja Sekarang
-    </button>
-  </section>
-
-  {/* ADMIN SETTING */}
-  <section className="p-6">
-    <h3 className="text-xl font-semibold mb-2">Admin Setting</h3>
-    <input
-      type="number"
-      value={goldPrice}
-      onChange={(e) => setGoldPrice(Number(e.target.value))}
-      className="border p-2"
-    />
-    <p>Harga emas 24K (global)</p>
-  </section>
-
-  {/* PRODUCTS */}
-  <section className="p-10 grid grid-cols-1 md:grid-cols-2 gap-6">
-    {products.map((p, i) => (
-      <div key={i} className="border p-6 rounded-2xl shadow">
-        <h3 className="text-lg font-bold">{p.name}</h3>
-        <p>Kadar: {p.karat}</p>
-        <p>Berat: {p.weight} gram</p>
-        <p className="font-semibold mt-2">
-          Rp {calcPrice(p.weight, p.karat).toLocaleString()}
-        </p>
-
-        <div className="flex gap-2 mt-4">
-          <button className="bg-gray-200 px-3 py-2 rounded">
-            Keranjang
-          </button>
-          <button className="bg-black text-white px-3 py-2 rounded">
-            Beli
-          </button>
-          <a
-            href={`https://wa.me/6282299081829?text=Saya tertarik ${p.name}`}
-            className="bg-green-500 text-white px-3 py-2 rounded"
-          >
-            WA
-          </a>
-        </div>
-      </div>
-    ))}
-  </section>
-
-  {/* TESTIMONI */}
-  <section className="p-10 bg-gray-100 text-center">
-    <h3 className="text-xl font-bold mb-4">Testimoni</h3>
-    <p>"Sudah beli 3x, selalu puas!"</p>
-    <p>"Harga lebih murah dari toko lain"</p>
-  </section>
-
-  {/* FOOTER */}
-  <footer className="p-6 text-center text-sm">
-    Jl. Pasar 2 No 33 Wonosobo | 08.00 - 16.30
-  </footer>
+  {page === "shop" ? <Shop /> : <Admin />}
 </div>
 ```
 
+);
+}
+
+// ================= SHOP =================
+function Shop() {
+const [products, setProducts] = useState([]);
+
+useEffect(() => {
+loadProducts();
+}, []);
+
+const loadProducts = async () => {
+const snapshot = await getDocs(collection(db, "products"));
+setProducts(snapshot.docs.map(d => ({ id: d.id, ...d.data() })));
+};
+
+const handleBuy = async (product) => {
+const order = {
+productName: product.name,
+price: product.price,
+status: "pending",
+createdAt: Date.now(),
+source: "website"
+};
+
+```
+await addDoc(collection(db, "orders"), order);
+
+const wa = `https://wa.me/6282299081829?text=Halo kak, saya mau pesan:\n\nProduk: ${product.name}\nHarga: ${product.price}`;
+window.open(wa, "_blank");
+```
+
+};
+
+return ( <div> <h1 className="text-xl font-bold mb-4">Toko Mas Sri Ayu</h1>
+
+```
+  <p className="text-green-600 font-semibold mb-4">
+    🟢 5 orang sedang melihat produk ini
+  </p>
+
+  <div className="grid grid-cols-2 gap-4">
+    {products.map(p => (
+      <div key={p.id} className="border p-3 rounded">
+        <span className="bg-yellow-400 text-xs px-2 py-1 rounded">
+          Best Seller
+        </span>
+
+        <p className="font-semibold mt-2">{p.name}</p>
+
+        <p className="line-through text-gray-400">
+          Rp {(p.price * 1.15).toLocaleString()}
+        </p>
+
+        <p className="text-lg font-bold text-red-600">
+          Rp {p.price.toLocaleString()}
+        </p>
+
+        <p className="text-red-500 text-sm">🔥 Terjual 12 hari ini</p>
+        <p className="text-orange-500 text-sm">⚠️ Sisa 2 pcs</p>
+
+        <p className="text-sm italic mt-2">
+          "Sudah beli 3x, kualitas bagus banget!"
+        </p>
+
+        <button
+          onClick={() => handleBuy(p)}
+          className="bg-green-500 text-white px-2 py-1 mt-3 w-full"
+        >
+          Beli Sekarang
+        </button>
+      </div>
+    ))}
+  </div>
+</div>
+```
+
+);
+}
+
+// ================= ADMIN =================
+function Admin() {
+const [products, setProducts] = useState([]);
+const [orders, setOrders] = useState([]);
+
+useEffect(() => {
+loadProducts();
+loadOrders();
+}, []);
+
+const loadProducts = async () => {
+const snapshot = await getDocs(collection(db, "products"));
+setProducts(snapshot.docs.map(d => ({ id: d.id, ...d.data() })));
+};
+
+const loadOrders = async () => {
+const snapshot = await getDocs(collection(db, "orders"));
+setOrders(snapshot.docs.map(d => ({ id: d.id, ...d.data() })));
+};
+
+const addProduct = async (name, price) => {
+await addDoc(collection(db, "products"), { name, price });
+loadProducts();
+};
+
+const updateStatus = async (id, status) => {
+await updateDoc(doc(db, "orders", id), { status });
+loadOrders();
+};
+
+return ( <div> <h2 className="text-lg font-bold mb-2">Admin Panel</h2>
+
+```
+  <AddProduct onAdd={addProduct} />
+
+  <h3 className="mt-6">Produk</h3>
+  {products.map(p => (
+    <div key={p.id}>{p.name} - Rp {p.price}</div>
+  ))}
+
+  <h3 className="mt-6">Orders</h3>
+  {orders.map(o => (
+    <div key={o.id} className="border p-2 mt-2">
+      <p>{o.productName}</p>
+      <p>Status: {o.status}</p>
+      <button onClick={() => updateStatus(o.id, "proses")} className="bg-yellow-500 px-2 mr-1">Proses</button>
+      <button onClick={() => updateStatus(o.id, "selesai")} className="bg-green-500 px-2">Selesai</button>
+    </div>
+  ))}
+</div>
+```
+
+);
+}
+
+function AddProduct({ onAdd }) {
+const [name, setName] = useState("");
+const [price, setPrice] = useState(0);
+
+return ( <div className="flex gap-2">
+<input placeholder="Nama" onChange={e => setName(e.target.value)} className="border" />
+<input type="number" placeholder="Harga" onChange={e => setPrice(Number(e.target.value))} className="border" />
+<button onClick={() => onAdd(name, price)} className="bg-blue-500 text-white px-2">Tambah</button> </div>
 );
 }
