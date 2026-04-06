@@ -9,7 +9,6 @@ updateDoc,
 doc
 } from "firebase/firestore";
 
-// 🔥 FIREBASE CONFIG
 const firebaseConfig = {
 apiKey: "AIzaSyCMhxO5hlxUBpZDuPa4PQkJ4EkIFfzxqf8",
 authDomain: "toko-mas-sri-ayu.firebaseapp.com",
@@ -47,22 +46,46 @@ loadProducts();
 
 const loadProducts = async () => {
 const snapshot = await getDocs(collection(db, "products"));
-setProducts(snapshot.docs.map(d => ({ id: d.id, ...d.data() })));
+let data = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+
+```
+// 🔥 kalau kosong → isi 10 produk contoh
+if (data.length === 0) {
+  const sample = [
+    { name: "Cincin Elegan 1", price: 2450000 },
+    { name: "Cincin Elegan 2", price: 2650000 },
+    { name: "Gelang Mewah 1", price: 3200000 },
+    { name: "Gelang Mewah 2", price: 3500000 },
+    { name: "Kalung Cantik 1", price: 4100000 },
+    { name: "Kalung Cantik 2", price: 4500000 },
+    { name: "Anting Minimalis 1", price: 1800000 },
+    { name: "Anting Minimalis 2", price: 2000000 },
+    { name: "Liontin Premium 1", price: 2700000 },
+    { name: "Liontin Premium 2", price: 3000000 }
+  ];
+
+  for (let p of sample) {
+    await addDoc(collection(db, "products"), p);
+  }
+
+  data = sample;
+}
+
+setProducts(data);
+```
+
 };
 
 const handleBuy = async (product) => {
-const order = {
+await addDoc(collection(db, "orders"), {
 productName: product.name,
 price: product.price,
 status: "pending",
-createdAt: Date.now(),
-source: "website"
-};
+createdAt: Date.now()
+});
 
 ```
-await addDoc(collection(db, "orders"), order);
-
-const wa = `https://wa.me/6282299081829?text=Halo kak, saya mau pesan:\n\nProduk: ${product.name}\nHarga: ${product.price}`;
+const wa = `https://wa.me/6282299081829?text=Halo kak, saya mau pesan:\nProduk: ${product.name}\nHarga: ${product.price}`;
 window.open(wa, "_blank");
 ```
 
@@ -71,16 +94,10 @@ window.open(wa, "_blank");
 return ( <div> <h1 className="text-xl font-bold mb-4">Toko Mas Sri Ayu</h1>
 
 ```
-  <p className="text-green-600 font-semibold mb-4">
-    🟢 5 orang sedang melihat produk ini
-  </p>
-
   <div className="grid grid-cols-2 gap-4">
     {products.map(p => (
       <div key={p.id} className="border p-3 rounded">
-        <span className="bg-yellow-400 text-xs px-2 py-1 rounded">
-          Best Seller
-        </span>
+        <span className="bg-yellow-400 text-xs px-2 py-1 rounded">Best Seller</span>
 
         <p className="font-semibold mt-2">{p.name}</p>
 
@@ -94,10 +111,6 @@ return ( <div> <h1 className="text-xl font-bold mb-4">Toko Mas Sri Ayu</h1>
 
         <p className="text-red-500 text-sm">🔥 Terjual 12 hari ini</p>
         <p className="text-orange-500 text-sm">⚠️ Sisa 2 pcs</p>
-
-        <p className="text-sm italic mt-2">
-          "Sudah beli 3x, kualitas bagus banget!"
-        </p>
 
         <button
           onClick={() => handleBuy(p)}
@@ -147,14 +160,19 @@ loadOrders();
 return ( <div> <h2 className="text-lg font-bold mb-2">Admin Panel</h2>
 
 ```
+  {/* TAMBAH PRODUK */}
   <AddProduct onAdd={addProduct} />
 
+  {/* LIST PRODUK */}
   <h3 className="mt-6">Produk</h3>
   {products.map(p => (
-    <div key={p.id}>{p.name} - Rp {p.price}</div>
+    <div key={p.id} className="border p-2 mt-2">
+      {p.name} - Rp {p.price}
+    </div>
   ))}
 
-  <h3 className="mt-6">Orders</h3>
+  {/* ORDERS */}
+  <h3 className="mt-6">Orders Masuk</h3>
   {orders.map(o => (
     <div key={o.id} className="border p-2 mt-2">
       <p>{o.productName}</p>
