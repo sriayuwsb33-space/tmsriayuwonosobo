@@ -56,7 +56,6 @@ const App = () => {
       setProducts(productsData);
     } catch (error) {
       console.error("Error fetching products: ", error);
-      alert('Gagal memuat data produk');
     } finally {
       setLoading(false);
     }
@@ -66,12 +65,10 @@ const App = () => {
     e.preventDefault();
     try {
       if (editingProduct) {
-        // Update product
         const productRef = doc(db, 'products', editingProduct.id);
         await updateDoc(productRef, formData);
         alert('Produk berhasil diupdate!');
       } else {
-        // Add new product
         await addDoc(collection(db, 'products'), formData);
         alert('Produk berhasil ditambahkan!');
       }
@@ -87,10 +84,10 @@ const App = () => {
         badge: '',
         image: ''
       });
-      fetchProducts(); // Refresh data
+      fetchProducts();
     } catch (error) {
       console.error("Error saving product: ", error);
-      alert('Gagal menyimpan produk');
+      alert('Gagal menyimpan produk: ' + error.message);
     }
   };
 
@@ -102,7 +99,7 @@ const App = () => {
         fetchProducts();
       } catch (error) {
         console.error("Error deleting product: ", error);
-        alert('Gagal menghapus produk');
+        alert('Gagal menghapus produk: ' + error.message);
       }
     }
   };
@@ -122,7 +119,53 @@ const App = () => {
     setShowModal(true);
   };
 
-  // Product Modal Form
+  // Sample data jika Firebase kosong
+  const sampleProducts = [
+    {
+      id: 'sample1',
+      name: "Cincin Solitaire 1ct",
+      category: "Cincin",
+      price: "Rp 12.500.000",
+      originalPrice: "Rp 15.000.000",
+      rating: 5,
+      reviews: 42,
+      badge: "Best Seller",
+      image: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=500&auto=format"
+    },
+    {
+      id: 'sample2',
+      name: "Kalung Mutiara Emas",
+      category: "Kalung",
+      price: "Rp 8.900.000",
+      rating: 4,
+      reviews: 28,
+      badge: "",
+      image: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=500&auto=format"
+    },
+    {
+      id: 'sample3',
+      name: "Gelang Rantai Venice",
+      category: "Gelang",
+      price: "Rp 5.750.000",
+      rating: 5,
+      reviews: 19,
+      badge: "New",
+      image: "https://images.unsplash.com/photo-1617038220319-276d3cfab638?w=500&auto=format"
+    },
+    {
+      id: 'sample4',
+      name: "Anting Hanging Drop",
+      category: "Anting",
+      price: "Rp 3.200.000",
+      rating: 4,
+      reviews: 35,
+      badge: "",
+      image: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=500&auto=format"
+    }
+  ];
+
+  const displayProducts = products.length > 0 ? products : sampleProducts;
+
   const ProductModal = () => (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
@@ -133,10 +176,6 @@ const App = () => {
           <button onClick={() => {
             setShowModal(false);
             setEditingProduct(null);
-            setFormData({
-              name: '', category: '', price: '', originalPrice: '',
-              rating: 5, reviews: 0, badge: '', image: ''
-            });
           }} className="text-gray-500 hover:text-gray-700">
             <XCircle className="h-6 w-6" />
           </button>
@@ -289,7 +328,7 @@ const App = () => {
             <div className="relative">
               <ShoppingBag className="h-5 w-5 text-gray-600 cursor-pointer hover:text-amber-600" />
               <span className="absolute -top-2 -right-2 bg-amber-600 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
-                {products.length}
+                {displayProducts.length}
               </span>
             </div>
             <button className="md:hidden" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
@@ -371,7 +410,7 @@ const App = () => {
         </div>
       </section>
 
-      {/* Products Section with Admin Controls */}
+      {/* Products Section */}
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
@@ -379,7 +418,7 @@ const App = () => {
             <p className="text-gray-500 mt-2">Emas asli dengan sertifikat</p>
           </div>
           
-          {/* Admin Button - Add Product */}
+          {/* Admin Button */}
           <div className="flex justify-end mb-6">
             <button
               onClick={() => {
@@ -396,16 +435,11 @@ const App = () => {
             </button>
           </div>
 
-          {loading ? (
-            <div className="text-center py-20">
-              <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-amber-600 border-t-transparent"></div>
-              <p className="mt-4 text-gray-500">Memuat produk...</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {products.map((product) => (
-                <div key={product.id} className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition group relative">
-                  {/* Admin Action Buttons */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {displayProducts.map((product) => (
+              <div key={product.id} className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition group relative">
+                {/* Admin Action Buttons - hanya tampil jika produk dari Firebase */}
+                {products.length > 0 && (
                   <div className="absolute top-2 right-2 z-10 flex gap-2 opacity-0 group-hover:opacity-100 transition">
                     <button
                       onClick={() => handleEdit(product)}
@@ -420,54 +454,48 @@ const App = () => {
                       <Trash2 className="h-3 w-3" />
                     </button>
                   </div>
-                  
-                  <div className="relative overflow-hidden h-64">
-                    <img 
-                      src={product.image} 
-                      alt={product.name} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
-                      onError={(e) => {
-                        e.target.src = 'https://via.placeholder.com/400x400?text=Image+Not+Found';
-                      }}
-                    />
-                    {product.badge && (
-                      <span className="absolute top-3 left-3 bg-amber-600 text-white text-xs px-2 py-1 rounded-full">
-                        {product.badge}
-                      </span>
-                    )}
-                    <button className="absolute bottom-3 right-3 bg-white p-2 rounded-full shadow-md hover:bg-amber-50">
-                      <Heart className="h-4 w-4 text-gray-600" />
-                    </button>
-                  </div>
-                  <div className="p-4">
-                    <div className="text-xs text-amber-600 mb-1">{product.category}</div>
-                    <h3 className="font-semibold text-lg">{product.name}</h3>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className="text-amber-700 font-bold">{product.price}</span>
-                      {product.originalPrice && (
-                        <span className="text-gray-400 line-through text-sm">{product.originalPrice}</span>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-1 mt-2">
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} className={`h-3 w-3 ${i < Math.floor(product.rating) ? 'fill-amber-500 text-amber-500' : 'text-gray-300'}`} />
-                      ))}
-                      <span className="text-xs text-gray-500 ml-1">({product.reviews})</span>
-                    </div>
-                    <button className="mt-4 w-full border border-amber-600 text-amber-700 py-2 rounded-full text-sm font-medium hover:bg-amber-600 hover:text-white transition">
-                      Lihat Detail
-                    </button>
-                  </div>
+                )}
+                
+                <div className="relative overflow-hidden h-64">
+                  <img 
+                    src={product.image} 
+                    alt={product.name} 
+                    className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                    onError={(e) => {
+                      e.target.src = 'https://via.placeholder.com/400x400?text=Image+Not+Found';
+                    }}
+                  />
+                  {product.badge && (
+                    <span className="absolute top-3 left-3 bg-amber-600 text-white text-xs px-2 py-1 rounded-full">
+                      {product.badge}
+                    </span>
+                  )}
+                  <button className="absolute bottom-3 right-3 bg-white p-2 rounded-full shadow-md hover:bg-amber-50">
+                    <Heart className="h-4 w-4 text-gray-600" />
+                  </button>
                 </div>
-              ))}
-            </div>
-          )}
-          
-          {!loading && products.length === 0 && (
-            <div className="text-center py-20">
-              <p className="text-gray-500">Belum ada produk. Klik "Tambah Produk" untuk mulai menambahkan koleksi.</p>
-            </div>
-          )}
+                <div className="p-4">
+                  <div className="text-xs text-amber-600 mb-1">{product.category}</div>
+                  <h3 className="font-semibold text-lg">{product.name}</h3>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-amber-700 font-bold">{product.price}</span>
+                    {product.originalPrice && (
+                      <span className="text-gray-400 line-through text-sm">{product.originalPrice}</span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1 mt-2">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className={`h-3 w-3 ${i < Math.floor(product.rating) ? 'fill-amber-500 text-amber-500' : 'text-gray-300'}`} />
+                    ))}
+                    <span className="text-xs text-gray-500 ml-1">({product.reviews})</span>
+                  </div>
+                  <button className="mt-4 w-full border border-amber-600 text-amber-700 py-2 rounded-full text-sm font-medium hover:bg-amber-600 hover:text-white transition">
+                    Lihat Detail
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -536,3 +564,5 @@ const App = () => {
     </div>
   );
 };
+
+export default App;
