@@ -1,100 +1,96 @@
-// PREMIUM CLEAN UI FIX - TOKO MAS SRI AYU
-// Fokus: Elegant Minimalis + Fix warna admin
+import React, { useState } from "react";
 
-import React, { useState, useMemo, useEffect } from 'react';
+export default function TokoMasSriAyu() {
+const [goldPrice, setGoldPrice] = useState(2700000);
 
-export default function App() {
-  const [view, setView] = useState('home');
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [login, setLogin] = useState({ user:'', pass:'' });
+const calcPrice = (weight, karat) => {
+const rate = karat === "6K" ? 0.25 : 0.33;
+const base = goldPrice * rate * weight;
+const ongkos = 100000;
+const margin = base * 0.15;
+return Math.round(base + ongkos + margin);
+};
 
-  const [goldPrice, setGoldPrice] = useState(2550000);
+const products = [
+{ name: "Cincin Elegan Sri Ayu", weight: 3, karat: "6K" },
+{ name: "Gelang Mewah Sri Ayu", weight: 5, karat: "8K" },
+];
 
-  const products = [
-    {id:1,name:'Cincin Elegan Wanita',img:'https://images.unsplash.com/photo-1611652022419-a9419f74343d',w:2.1,k:'8K'},
-    {id:2,name:'Kalung Emas Simple',img:'https://images.unsplash.com/photo-1602751584552-8ba73aad10e1',w:5.2,k:'8K'},
-    {id:3,name:'Gelang Bayi Lucu',img:'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908',w:1.5,k:'6K'},
-  ];
+return ( <div className="min-h-screen bg-white text-black">
+{/* HEADER */} <header className="p-6 shadow-md flex justify-between items-center"> <h1 className="text-xl font-bold">Toko Mas Sri Ayu</h1> <a
+       href="https://wa.me/6282299081829"
+       className="bg-green-500 text-white px-4 py-2 rounded-xl"
+     >
+Chat WhatsApp </a> </header>
 
-  const harga = useMemo(()=>({
-    '6K': Math.ceil(goldPrice*0.34/5000)*5000,
-    '8K': Math.ceil(goldPrice*0.445/5000)*5000,
-    '9K': Math.ceil(goldPrice*0.49/5000)*5000
-  }),[goldPrice]);
+```
+  {/* HERO */}
+  <section className="p-10 text-center bg-yellow-100">
+    <h2 className="text-3xl font-bold mb-4">
+      Kilau Emas Terpercaya, Harga Bersahabat
+    </h2>
+    <p className="mb-6">
+      Temukan koleksi emas terbaik dengan harga transparan
+    </p>
+    <button className="bg-black text-white px-6 py-3 rounded-2xl">
+      Belanja Sekarang
+    </button>
+  </section>
 
-  const format = n=>new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',minimumFractionDigits:0}).format(n);
+  {/* ADMIN SETTING */}
+  <section className="p-6">
+    <h3 className="text-xl font-semibold mb-2">Admin Setting</h3>
+    <input
+      type="number"
+      value={goldPrice}
+      onChange={(e) => setGoldPrice(Number(e.target.value))}
+      className="border p-2"
+    />
+    <p>Harga emas 24K (global)</p>
+  </section>
 
-  const loginAdmin=()=>{
-    if(login.user==='yuhu' && login.pass==='admin'){
-      setIsAdmin(true);
-      setView('admin');
-    } else alert('Login salah');
-  }
+  {/* PRODUCTS */}
+  <section className="p-10 grid grid-cols-1 md:grid-cols-2 gap-6">
+    {products.map((p, i) => (
+      <div key={i} className="border p-6 rounded-2xl shadow">
+        <h3 className="text-lg font-bold">{p.name}</h3>
+        <p>Kadar: {p.karat}</p>
+        <p>Berat: {p.weight} gram</p>
+        <p className="font-semibold mt-2">
+          Rp {calcPrice(p.weight, p.karat).toLocaleString()}
+        </p>
 
-  return (
-    <div className="bg-[#fafafa] text-gray-800 min-h-screen font-sans">
-
-      {/* NAV */}
-      <div className="flex justify-between px-8 py-5 bg-white border-b">
-        <h1 className="text-lg font-semibold tracking-wide">Sri Ayu Gold</h1>
-        <div className="flex gap-6 text-sm">
-          <button onClick={()=>setView('home')}>Home</button>
-          <button onClick={()=>setView('catalog')}>Catalog</button>
-          <button onClick={()=>setView('login')}>Admin</button>
+        <div className="flex gap-2 mt-4">
+          <button className="bg-gray-200 px-3 py-2 rounded">
+            Keranjang
+          </button>
+          <button className="bg-black text-white px-3 py-2 rounded">
+            Beli
+          </button>
+          <a
+            href={`https://wa.me/6282299081829?text=Saya tertarik ${p.name}`}
+            className="bg-green-500 text-white px-3 py-2 rounded"
+          >
+            WA
+          </a>
         </div>
       </div>
+    ))}
+  </section>
 
-      {/* HOME */}
-      {view==='home' && (
-        <div className="flex items-center justify-center h-[70vh]">
-          <h1 className="text-3xl font-light">Toko Mas Sri Ayu</h1>
-        </div>
-      )}
+  {/* TESTIMONI */}
+  <section className="p-10 bg-gray-100 text-center">
+    <h3 className="text-xl font-bold mb-4">Testimoni</h3>
+    <p>"Sudah beli 3x, selalu puas!"</p>
+    <p>"Harga lebih murah dari toko lain"</p>
+  </section>
 
-      {/* CATALOG */}
-      {view==='catalog' && (
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-6 p-8 max-w-6xl mx-auto">
-          {products.map(p=>(
-            <div key={p.id} className="bg-white p-4 rounded-xl shadow-sm text-center">
-              <img src={p.img} className="w-full h-48 object-cover rounded-lg"/>
-              <h3 className="mt-3 font-medium">{p.name}</h3>
-              <p className="text-gray-500 text-sm">{format(p.w*harga[p.k])}</p>
-            </div>
-          ))}
-        </div>
-      )}
+  {/* FOOTER */}
+  <footer className="p-6 text-center text-sm">
+    Jl. Pasar 2 No 33 Wonosobo | 08.00 - 16.30
+  </footer>
+</div>
+```
 
-      {/* LOGIN */}
-      {view==='login' && (
-        <div className="flex items-center justify-center h-[70vh]">
-          <div className="bg-white p-8 rounded-xl shadow w-80">
-            <h2 className="text-center mb-4 font-medium text-gray-800">Admin Login</h2>
-            <input className="w-full border p-2 mb-3" placeholder="Username" onChange={e=>setLogin({...login,user:e.target.value})}/>
-            <input type="password" className="w-full border p-2 mb-3" placeholder="Password" onChange={e=>setLogin({...login,pass:e.target.value})}/>
-            <button onClick={loginAdmin} className="w-full bg-black text-white py-2 rounded">Login</button>
-          </div>
-        </div>
-      )}
-
-      {/* ADMIN */}
-      {view==='admin' && isAdmin && (
-        <div className="p-8 max-w-4xl mx-auto space-y-6">
-
-          <h2 className="text-xl font-semibold text-gray-800">Admin Panel</h2>
-
-          {/* CARD */}
-          <div className="bg-white p-6 rounded-xl shadow">
-            <h3 className="mb-2 font-medium text-gray-700">Harga Emas</h3>
-            <input 
-              type="number" 
-              value={goldPrice} 
-              onChange={e=>setGoldPrice(parseInt(e.target.value))} 
-              className="border p-2 w-full text-gray-800"/>
-          </div>
-
-        </div>
-      )}
-
-    </div>
-  );
+);
 }
