@@ -1,96 +1,84 @@
-// FINAL PROFESSIONAL VERSION - TOKO MAS SRI AYU WONOSOBO
-// UI lebih rapi + 10 produk contoh + admin login
+// PREMIUM UPGRADE V2 - TOKO MAS SRI AYU WONOSOBO
+// UI Luxury + Admin Lengkap + CRUD Produk + Order + User Control
 
-import React, { useState, useEffect, useMemo } from 'react';
-import { initializeApp } from "firebase/app";
-import { getFirestore, doc, setDoc, onSnapshot } from "firebase/firestore";
-import { getAuth, signInAnonymously } from "firebase/auth";
-
-// FIREBASE
-const firebaseConfig = {
-  apiKey: "AIzaSyCMhxO5hlxUBpZDuPa4PQkJ4EkIFfzxqf8",
-  authDomain: "toko-mas-sri-ayu.firebaseapp.com",
-  projectId: "toko-mas-sri-ayu",
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
-
-// DEFAULT KADAR
-const DEFAULT_KADAR = {
-  '6K': { sell: 0.34, buy: 0.27 },
-  '8K': { sell: 0.445, buy: 0.35 },
-  '9K': { sell: 0.49, buy: 0.39 },
-};
-
-// SAMPLE PRODUCTS (10)
-const SAMPLE_PRODUCTS = [
-  { id: 1, name: 'Cincin Elegan Wanita', weight: 2.1, kadar: '8K', imageUrl: 'https://images.unsplash.com/photo-1611652022419-a9419f74343d', isSold:false, isPending:false },
-  { id: 2, name: 'Kalung Emas Simple', weight: 5.2, kadar: '8K', imageUrl: 'https://images.unsplash.com/photo-1602751584552-8ba73aad10e1', isSold:false, isPending:false },
-  { id: 3, name: 'Gelang Bayi Lucu', weight: 1.5, kadar: '6K', imageUrl: 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908', isSold:false, isPending:false },
-  { id: 4, name: 'Anting Fashion Korea', weight: 1.2, kadar: '8K', imageUrl: 'https://images.unsplash.com/photo-1588444650733-d0b6c3a5f7f4', isSold:false, isPending:false },
-  { id: 5, name: 'Cincin Kawin Polos', weight: 4.0, kadar: '9K', imageUrl: 'https://images.unsplash.com/photo-1622398925373-3f91b1e275f5', isSold:false, isPending:false },
-  { id: 6, name: 'Kalung Premium Wanita', weight: 6.5, kadar: '9K', imageUrl: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f', isSold:false, isPending:false },
-  { id: 7, name: 'Gelang Rantai Pria', weight: 7.0, kadar: '9K', imageUrl: 'https://images.unsplash.com/photo-1617038260897-41a1f14a6f84', isSold:false, isPending:false },
-  { id: 8, name: 'Anting Anak Karakter', weight: 1.3, kadar: '6K', imageUrl: 'https://images.unsplash.com/photo-1599643477877-530eb83abc8e', isSold:false, isPending:false },
-  { id: 9, name: 'Cincin Berlian Look', weight: 2.8, kadar: '8K', imageUrl: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e', isSold:false, isPending:false },
-  { id: 10, name: 'Kalung Couple', weight: 3.5, kadar: '8K', imageUrl: 'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1', isSold:false, isPending:false },
-];
+import React, { useState, useMemo, useEffect } from 'react';
 
 export default function App() {
   const [view, setView] = useState('home');
   const [isAdmin, setIsAdmin] = useState(false);
-  const [adminLogin, setAdminLogin] = useState({ user:'', pass:'' });
+  const [login, setLogin] = useState({ user:'', pass:'' });
 
   const [goldPrice, setGoldPrice] = useState(2550000);
-  const [kadar, setKadar] = useState(DEFAULT_KADAR);
-
-  const [products, setProducts] = useState(SAMPLE_PRODUCTS);
+  const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
   const [users, setUsers] = useState([]);
 
-  const [cart, setCart] = useState([]);
-  const [selected, setSelected] = useState(null);
+  const [newProduct, setNewProduct] = useState({ name:'', weight:'', img:'', kadar:'8K' });
 
-  const [customer, setCustomer] = useState({ name:'', phone:'' });
+  const defaultProducts = [
+    {id:1,name:'Cincin Elegan Wanita',img:'https://images.unsplash.com/photo-1611652022419-a9419f74343d',w:2.1,k:'8K'},
+    {id:2,name:'Kalung Emas Simple',img:'https://images.unsplash.com/photo-1602751584552-8ba73aad10e1',w:5.2,k:'8K'},
+    {id:3,name:'Gelang Bayi Lucu',img:'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908',w:1.5,k:'6K'},
+    {id:4,name:'Anting Fashion Korea',img:'https://images.unsplash.com/photo-1588444650733-d0b6c3a5f7f4',w:1.2,k:'8K'},
+  ];
 
-  useEffect(() => { signInAnonymously(auth); }, []);
+  useEffect(()=>{ setProducts(defaultProducts); },[]);
 
-  const prices = useMemo(() => {
-    let r = {};
-    Object.keys(kadar).forEach(k => {
-      r[k] = Math.ceil((goldPrice * kadar[k].sell)/5000)*5000;
-    });
-    return r;
-  }, [goldPrice]);
+  const harga = useMemo(()=>({
+    '6K': Math.ceil(goldPrice*0.34/5000)*5000,
+    '8K': Math.ceil(goldPrice*0.445/5000)*5000,
+    '9K': Math.ceil(goldPrice*0.49/5000)*5000
+  }),[goldPrice]);
 
-  const formatRp = n => new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',minimumFractionDigits:0}).format(n);
+  const format = n=>new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',minimumFractionDigits:0}).format(n);
 
-  const addToCart = p => setCart([...cart, p]);
+  const slides = [
+    'https://images.unsplash.com/photo-1605100804763-247f67b3557e',
+    'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f'
+  ];
 
-  const checkout = () => {
-    const total = cart.reduce((s,i)=>s+(i.weight*prices[i.kadar]),0);
-    window.open(`https://wa.me/6282299081829?text=Order%20Total%20${total}`);
-  };
+  const [slide,setSlide]=useState(0);
+  useEffect(()=>{
+    const t=setInterval(()=>setSlide(s=>(s+1)%slides.length),4000);
+    return ()=>clearInterval(t);
+  },[]);
 
-  const loginAdmin = () => {
-    if(adminLogin.user==='yuhu' && adminLogin.pass==='admin'){
+  const loginAdmin=()=>{
+    if(login.user==='yuhu' && login.pass==='admin'){
       setIsAdmin(true);
       setView('admin');
     } else alert('Login salah');
-  };
+  }
+
+  const addProduct=()=>{
+    setProducts([...products,{...newProduct,id:Date.now(),w:parseFloat(newProduct.weight),k:newProduct.kadar}]);
+  }
+
+  const deleteProduct=(id)=>{
+    setProducts(products.filter(p=>p.id!==id));
+  }
+
+  const confirmOrder=(id)=>{
+    setOrders(orders.map(o=>o.id===id?{...o,status:'Selesai'}:o));
+  }
+
+  const cancelOrder=(id)=>{
+    setOrders(orders.map(o=>o.id===id?{...o,status:'Batal'}:o));
+  }
+
+  const blockUser=(phone)=>{
+    setUsers(users.map(u=>u.phone===phone?{...u,blocked:true}:u));
+  }
 
   return (
-    <div className="font-serif">
+    <div className="bg-white text-black min-h-screen font-serif">
 
       {/* NAV */}
-      <div className="flex justify-between p-6 border-b">
-        <h1 className="text-xl font-bold">Sri Ayu Gold</h1>
-        <div className="flex gap-6">
+      <div className="flex justify-between px-8 py-5 border-b">
+        <h1 className="text-xl font-semibold tracking-wide">Sri Ayu Gold</h1>
+        <div className="flex gap-8 text-sm">
           <button onClick={()=>setView('home')}>Home</button>
           <button onClick={()=>setView('catalog')}>Catalog</button>
-          <button onClick={()=>setView('cart')}>Cart ({cart.length})</button>
           <button onClick={()=>setView('login')}>Admin</button>
         </div>
       </div>
@@ -98,62 +86,73 @@ export default function App() {
       {/* HERO */}
       {view==='home' && (
         <div className="relative h-[80vh]">
-          <img src="https://images.unsplash.com/photo-1605100804763-247f67b3557e" className="absolute w-full h-full object-cover"/>
+          <img src={slides[slide]} className="w-full h-full object-cover"/>
           <div className="absolute inset-0 bg-black/40"/>
-          <div className="relative text-white flex flex-col items-center justify-center h-full">
-            <h1 className="text-5xl mb-4">Toko Mas Sri Ayu</h1>
-            <button onClick={()=>setView('catalog')} className="border px-6 py-3">Shop Now</button>
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-white">
+            <h1 className="text-5xl font-light mb-4">Sri Ayu Jewelry</h1>
+            <p className="mb-6 tracking-wide">Elegance • Luxury • Trusted Gold</p>
+            <button onClick={()=>setView('catalog')} className="border px-6 py-3 hover:bg-white hover:text-black transition">Explore Collection</button>
           </div>
         </div>
       )}
 
       {/* CATALOG */}
       {view==='catalog' && (
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-6 p-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-8 p-8 max-w-6xl mx-auto">
           {products.map(p=>(
-            <div key={p.id} onClick={()=>{setSelected(p);setView('detail')}} className="cursor-pointer">
-              <img src={p.imageUrl} className="h-48 w-full object-cover"/>
-              <h3>{p.name}</h3>
-              <p>{formatRp(p.weight*prices[p.kadar])}</p>
+            <div key={p.id} className="text-center group">
+              <img src={p.img} className="w-full h-60 object-cover rounded-xl group-hover:scale-105 transition duration-300"/>
+              <h3 className="mt-3 font-medium">{p.name}</h3>
+              <p className="text-gray-500">{format(p.w*harga[p.k])}</p>
             </div>
           ))}
         </div>
       )}
 
-      {/* DETAIL */}
-      {view==='detail' && selected && (
-        <div className="p-6">
-          <button onClick={()=>setView('catalog')}>Back</button>
-          <img src={selected.imageUrl} className="w-full max-w-md"/>
-          <h2 className="text-2xl">{selected.name}</h2>
-          <p>{formatRp(selected.weight*prices[selected.kadar])}</p>
-          <button onClick={()=>addToCart(selected)} className="border px-4 py-2">Add to Cart</button>
-        </div>
-      )}
-
-      {/* CART */}
-      {view==='cart' && (
-        <div className="p-6">
-          {cart.map(i=>(<p key={i.id}>{i.name}</p>))}
-          <button onClick={checkout} className="bg-black text-white px-6 py-3 mt-4">Checkout WA</button>
-        </div>
-      )}
-
-      {/* LOGIN ADMIN */}
+      {/* LOGIN */}
       {view==='login' && (
-        <div className="p-6 max-w-sm mx-auto">
-          <input placeholder="User" onChange={e=>setAdminLogin({...adminLogin,user:e.target.value})}/>
-          <input placeholder="Pass" type="password" onChange={e=>setAdminLogin({...adminLogin,pass:e.target.value})}/>
-          <button onClick={loginAdmin} className="bg-black text-white w-full mt-3 py-2">Login</button>
+        <div className="flex items-center justify-center h-[70vh]">
+          <div className="bg-white border p-10 rounded-2xl shadow-lg w-80">
+            <h2 className="text-center mb-6 text-lg font-light">Admin Login</h2>
+            <input className="w-full border-b p-2 mb-4 outline-none" placeholder="Username" onChange={e=>setLogin({...login,user:e.target.value})}/>
+            <input type="password" className="w-full border-b p-2 mb-6 outline-none" placeholder="Password" onChange={e=>setLogin({...login,pass:e.target.value})}/>
+            <button onClick={loginAdmin} className="w-full bg-black text-white py-2">Login</button>
+          </div>
         </div>
       )}
 
-      {/* ADMIN */}
+      {/* ADMIN PANEL */}
       {view==='admin' && isAdmin && (
-        <div className="p-6">
-          <h2>Admin Panel</h2>
-          <p>Harga Emas: {formatRp(goldPrice)}</p>
-          <input value={goldPrice} onChange={e=>setGoldPrice(parseInt(e.target.value))}/>
+        <div className="p-8 max-w-6xl mx-auto space-y-8">
+
+          <h2 className="text-2xl font-semibold">Admin Dashboard</h2>
+
+          {/* GOLD PRICE */}
+          <div className="border p-6 rounded-xl">
+            <h3 className="mb-2">Harga Emas</h3>
+            <input type="number" value={goldPrice} onChange={e=>setGoldPrice(parseInt(e.target.value))} className="border p-2 w-full"/>
+          </div>
+
+          {/* ADD PRODUCT */}
+          <div className="border p-6 rounded-xl">
+            <h3 className="mb-3">Tambah Produk</h3>
+            <input placeholder="Nama" className="border p-2 w-full mb-2" onChange={e=>setNewProduct({...newProduct,name:e.target.value})}/>
+            <input placeholder="Berat" className="border p-2 w-full mb-2" onChange={e=>setNewProduct({...newProduct,weight:e.target.value})}/>
+            <input placeholder="URL Gambar" className="border p-2 w-full mb-2" onChange={e=>setNewProduct({...newProduct,img:e.target.value})}/>
+            <button onClick={addProduct} className="bg-black text-white px-4 py-2">Tambah</button>
+          </div>
+
+          {/* PRODUCT LIST */}
+          <div className="border p-6 rounded-xl">
+            <h3 className="mb-3">Daftar Produk</h3>
+            {products.map(p=>(
+              <div key={p.id} className="flex justify-between border-b py-2">
+                <span>{p.name}</span>
+                <button onClick={()=>deleteProduct(p.id)} className="text-red-500">Hapus</button>
+              </div>
+            ))}
+          </div>
+
         </div>
       )}
 
